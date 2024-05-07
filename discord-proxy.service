@@ -1,0 +1,14 @@
+[Unit]
+Description=My Proxy Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 /path/to/proxy.py
+WorkingDirectory=/path/to/directory/of/proxy.py-without-proxy.py
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=root
+
+[Install]
+WantedBy=multi-user.target
