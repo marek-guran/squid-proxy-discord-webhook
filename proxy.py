@@ -21,20 +21,31 @@ def send_to_discord(data):
 
 def tail_log(file):
     with open(file, 'r') as f:
-        # Seek to the end of the file
         f.seek(0, os.SEEK_END)
         
-        # Start tailing the log file
         while True:
+            curr_position = f.tell()
             line = f.readline()
             if line:
                 parts = line.strip().split()
-                timestamp = int(float(parts[0]))  # Convert the timestamp to an integer
+                timestamp = int(float(parts[0]))
                 ip = parts[2]
                 destination = parts[6]
                 send_to_discord(f"<t:{timestamp}:t> IP: {ip}, Destination: {destination}")
             else:
+                # Sleep for a short time before checking for new lines
                 time.sleep(1)
+                # Check if the file was rotated
+                if os.path.exists(file):
+                    new_size = os.path.getsize(file)
+                    if new_size < curr_position:
+                        print("Log file rotated. Reopening...")
+                        f.close()
+                        f = open(file, 'r')
+                        f.seek(0, os.SEEK_END)
+                else:
+                    print("Log file does not exist. Waiting for it to reappear...")
+                    time.sleep(5)
 
 if __name__ == "__main__":
     tail_log(log_file)
